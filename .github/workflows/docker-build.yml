@@ -25,19 +25,51 @@ jobs:
 
       - name: Initialiser les conteneurs
         run: |
-          for i in {1..5}; do docker-compose up -d && break || sleep 15; done
+          docker-compose up -d
+          # Verify containers are running
+          docker-compose ps
+          # Wait for containers to be healthy
+          for i in {1..30}; do
+            if docker-compose ps | grep -q "healthy"; then
+              break
+            fi
+            echo "Waiting for containers to be healthy..."
+            sleep 2
+          done
+
+      - name: Vérifier l'état des conteneurs
+        run: |
+          echo "Liste des conteneurs en cours d'exécution:"
+          docker ps
+          echo "Logs des conteneurs:"
+          docker-compose logs
 
       - name: Installer les dépendances Composer
-        run: docker exec laravel-docker bash -c "composer install"
+        run: |
+          # Get the actual container name
+          CONTAINER_ID=$(docker-compose ps -q app || docker-compose ps -q web || docker-compose ps -q laravel)
+          if [ -z "$CONTAINER_ID" ]; then
+            echo "Error: Could not find Laravel container"
+            exit 1
+          fi
+          docker exec $CONTAINER_ID composer install
 
       - name: Migrer la base de données
-        run: docker exec laravel-docker bash -c "php artisan migrate --force"
+        run: |
+          CONTAINER_ID=$(docker-compose ps -q app || docker-compose ps -q web || docker-compose ps -q laravel)
+          docker exec $CONTAINER_ID php artisan migrate --force
 
       - name: Peupler la base de données
-        run: docker exec laravel-docker bash -c "php artisan db:seed --force"
+        run: |
+          CONTAINER_ID=$(docker-compose ps -q app || docker-compose ps -q web || docker-compose ps -q laravel)
+          docker exec $CONTAINER_ID php artisan db:seed --force
 
       - name: Migrer la base de données de test
-        run: docker exec laravel-docker bash -c "php artisan migrate --env=testing --force"
+        run: |
+          CONTAINER_ID=$(docker-compose ps -q app || docker-compose ps -q web || docker-compose ps -q laravel)
+          docker exec $CONTAINER_ID php artisan migrate --env=testing --force
 
       - name: Exécuter les tests PHPUnit
-        run: docker exec laravel-docker bash -c "php artisan test tests/Feature"
+        run: |
+          CONTAINER_ID=$(docker-compose ps -q app || docker-compose ps -q web || docker-compose ps -q laravel)
+          docker exec $CONTAINER_ID php artisan test tests/Feature
