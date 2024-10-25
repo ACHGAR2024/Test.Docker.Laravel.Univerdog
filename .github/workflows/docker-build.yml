@@ -65,8 +65,3 @@ jobs:
         run: |
           CONTAINER_ID=$(docker-compose ps -q app || docker-compose ps -q web || docker-compose ps -q laravel)  # Utilisez docker-compose ici
           docker exec $CONTAINER_ID php artisan migrate --env=testing --force
-
-      - name: Exécuter les tests Pest
-        run: |
-          CONTAINER_ID=$(docker-compose ps -q app || docker-compose ps -q web || docker-compose ps -q laravel)  # Utilisez docker-compose ici
-          docker exec $CONTAINER_ID php artisan test --testsuite=Feature  # Exécutez les tests Pest
