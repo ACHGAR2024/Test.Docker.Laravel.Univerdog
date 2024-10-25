@@ -1,0 +1,48 @@
+version: '3.8'  # Ajoutez la version pour éviter l'avertissement
+
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: univerdog_laravel_app
+    volumes:
+      - ./:/var/www/html
+      - ./docker/apache/vhost.conf:/etc/apache2/sites-enabled/000-default.conf
+    ports:
+      - "127.0.0.1:8080:80"
+    networks:
+      - laravel
+    depends_on:
+      - mysql  # Ajoutez cette ligne
+
+  mysql:
+    image: mysql:8.0
+    container_name: univerdog_laravel_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: univerdog_user_password  # Mot de passe pour l'utilisateur root
+      MYSQL_DATABASE: univerdog-docker-api
+      MYSQL_USER: newuser
+      MYSQL_PASSWORD: newpassword
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - laravel
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: univerdog_phpmyadmin
+    ports:
+      - "9002:80"  # Accès à phpMyAdmin via http://localhost:9002
+    environment:
+      PMA_HOST: univerdog_laravel_mysql  # Correspond au nom du service MySQL
+      PMA_USER: newuser  # Utilisateur pour se connecter
+      PMA_PASSWORD: newpassword  # Mot de passe pour le nouvel utilisateur
+    networks:
+      - laravel
+
+networks:
+  laravel:
+
+volumes:
+  mysql_data:
