@@ -22,8 +22,8 @@ jobs:
       - name: Set up Docker Compose
         run: |
           sudo apt-get update
-          sudo apt-get install -y docker-compose-plugin
-          docker compose version
+          sudo apt-get install -y docker-compose
+          docker-compose version  # Utilisez docker-compose ici
 
       - name: Dormir pendant 10 secondes
         run: sleep 10s
@@ -31,20 +31,20 @@ jobs:
 
       - name: Initialiser les conteneurs
         run: |
-          docker compose up -d
+          docker-compose up -d  # Utilisez docker-compose ici
           # Verify containers are running
-          docker compose ps
+          docker-compose ps  # Utilisez docker-compose ici
 
       - name: Vérifier l'état des conteneurs
         run: |
           echo "Liste des conteneurs en cours d'exécution:"
           docker ps
           echo "Logs des conteneurs:"
-          docker compose logs
+          docker-compose logs  # Utilisez docker-compose ici
 
       - name: Installer les dépendances Composer
         run: |
-          CONTAINER_ID=$(docker compose ps -q app || docker compose ps -q web || docker compose ps -q laravel)
+          CONTAINER_ID=$(docker-compose ps -q app || docker-compose ps -q web || docker-compose ps -q laravel)  # Utilisez docker-compose ici
           if [ -z "$CONTAINER_ID" ]; then
             echo "Error: Could not find Laravel container"
             exit 1
@@ -53,20 +53,20 @@ jobs:
 
       - name: Migrer la base de données
         run: |
-          CONTAINER_ID=$(docker compose ps -q app || docker compose ps -q web || docker compose ps -q laravel)
+          CONTAINER_ID=$(docker-compose ps -q app || docker-compose ps -q web || docker-compose ps -q laravel)  # Utilisez docker-compose ici
           docker exec $CONTAINER_ID php artisan migrate --force
 
       - name: Peupler la base de données
         run: |
-          CONTAINER_ID=$(docker compose ps -q app || docker compose ps -q web || docker compose ps -q laravel)
+          CONTAINER_ID=$(docker-compose ps -q app || docker-compose ps -q web || docker-compose ps -q laravel)  # Utilisez docker-compose ici
           docker exec $CONTAINER_ID php artisan db:seed --force
 
       - name: Migrer la base de données de test
         run: |
-          CONTAINER_ID=$(docker compose ps -q app || docker compose ps -q web || docker compose ps -q laravel)
+          CONTAINER_ID=$(docker-compose ps -q app || docker-compose ps -q web || docker-compose ps -q laravel)  # Utilisez docker-compose ici
           docker exec $CONTAINER_ID php artisan migrate --env=testing --force
 
       - name: Exécuter les tests PHPUnit
         run: |
-          CONTAINER_ID=$(docker compose ps -q app || docker compose ps -q web || docker compose ps -q laravel)
+          CONTAINER_ID=$(docker-compose ps -q app || docker-compose ps -q web || docker-compose ps -q laravel)  # Utilisez docker-compose ici
           docker exec $CONTAINER_ID php artisan test tests/Feature
