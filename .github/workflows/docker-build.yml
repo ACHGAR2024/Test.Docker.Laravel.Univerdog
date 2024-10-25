@@ -39,7 +39,7 @@ jobs:
 
       - name: Install Composer dependencies
         run: |
-          docker run --rm -v ${{ github.workspace }}:/var/www/html composer install
+          docker run --rm -v ${{ github.workspace }}:/app -w /app composer install
 
       - name: Run tests
         run: |
